@@ -38,7 +38,7 @@ Each session adds new diagrams showing the state at that point in time.
 - Each diagram is self-explanatory with labels
 - Use for quick visual scans of progress
 
----
+* * *
 
 EOF
     echo "Initialized: $GRAPHIC_LOG"
@@ -101,7 +101,7 @@ build_session_entry() {
         entry+="![${name}](graphics/$(basename "$img"))"$'\n\n'
     done
 
-    entry+="---"$'\n\n'
+    entry+="* * *"$'\n\n'
 
     echo "$entry"
 }
@@ -112,8 +112,8 @@ build_session_entry() {
 
 NEW_ENTRY=$(build_session_entry)
 
-# Find the line after the header section (after first ---)
-HEADER_END=$(grep -n "^---$" "$GRAPHIC_LOG" | head -1 | cut -d: -f1)
+# Find the line after the header section (after first horizontal rule)
+HEADER_END=$(grep -n "^\* \* \*$" "$GRAPHIC_LOG" | head -1 | cut -d: -f1)
 
 if [[ -z "$HEADER_END" ]]; then
     # No header separator found, just prepend after title

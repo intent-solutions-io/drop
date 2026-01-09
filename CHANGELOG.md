@@ -9,7 +9,69 @@ This changelog serves as the official record for C-level review. Each entry capt
 - Alignment checks
 - Next session priorities
 
----
+* * *
+
+## Session: 2026-01-09 (Evening)
+
+### Summary
+
+Enhanced the `/ship-shelly` skill with professional diagram generation and fixed a critical issue with API key management. The `pass` password store requires GPG pinentry GUI which doesn't work in terminal-only environments, so we switched to `.env` file based configuration.
+
+### Progress Made
+
+- **Diagram Generation Scripts**: Added Python script for GCP architecture diagrams using official cloud icons, and bash scripts for D2 workflow diagrams
+- **Visual Changelog**: New cumulative visual timeline showing project evolution through diagrams
+- **API Key Fix**: Switched from `pass` to `.env` for Resend API key (pass requires GUI which fails in headless terminals)
+- **PDF Generation Fix**: Fixed YAML parsing issue in pandoc by using `* * *` instead of `---` for horizontal rules
+
+### Decisions & Rationale
+
+| Decision | Rationale | Needs Validation? |
+|----------|-----------|-------------------|
+| Switch from `pass` to `.env` for API keys | `pass` requires GPG pinentry GUI unavailable in terminal; `.env` works reliably | No |
+| Use `* * *` for horizontal rules | Avoids pandoc confusing `---` with YAML front matter | No |
+| Add 4 diagram types per session | Architecture (GCP icons), workflow, progress metrics, simplified architecture | No |
+
+### Alignment Check
+
+- **On track with vision**: Yes - making the automation more robust and visually rich
+- **Scope changes**: None - incremental improvements to existing tooling
+
+### Next Session Priorities
+
+1. **Send first test email**: Verify the complete pipeline works end-to-end
+2. **Add Shelly to GitHub**: Still need her GitHub username
+3. **Begin Water Drop implementation**: Once collaboration access confirmed
+
+### Technical Appendix
+
+<details>
+<summary>Commits</summary>
+
+| Hash | Message |
+|------|---------|
+| 049f013 | feat(ship-shelly): switch API key from pass to .env, add diagram scripts |
+
+</details>
+
+<details>
+<summary>Files Changed</summary>
+
+**Added:**
+- `.claude/skills/ship-shelly/scripts/generate-architecture.py` - GCP diagram with official icons
+- `.claude/skills/ship-shelly/scripts/generate-workflow.sh` - D2 workflow diagrams
+- `.claude/skills/ship-shelly/scripts/update-graphic-log.sh` - Visual changelog updater
+- `graphics/*.png` - Generated diagram files
+- `GRAPHIC-CHANGELOG.md` - Cumulative visual timeline
+
+**Modified:**
+- `.claude/skills/ship-shelly/SKILL.md` - Updated docs for .env, added diagram generation phases
+- `.claude/skills/ship-shelly/scripts/send-email.py` - Support multiple attachments, .env fallback
+- `.claude/skills/ship-shelly/templates/cwh-report.latex` - Template improvements
+
+</details>
+
+* * *
 
 ## Session: 2026-01-09
 
@@ -28,7 +90,6 @@ Built the `/ship-shelly` skill - an end-of-session automation that packages prog
 
 | Decision | Rationale | Needs Validation? |
 |----------|-----------|-------------------|
-| Use `pass` for API keys (not .env) | GPG encrypted, git-ignored by design, more secure than plaintext files | No |
 | Pandoc + xelatex for PDFs | Best Unicode support, professional output, widely available | No |
 | Claude writes changelog/email (not templates) | Leverages AI for natural language vs rigid templating - more human, less robotic | Yes |
 | Test mode sends only to Jeremy | Safe testing without accidentally emailing Shelly during development | No |
@@ -86,55 +147,8 @@ Built the `/ship-shelly` skill - an end-of-session automation that packages prog
 
 </details>
 
----
+* * *
 
 ## [Unreleased]
 
 *No unreleased changes yet.*
-
----
-
-<!-- Template for new entries (newest first):
-
-## Session: YYYY-MM-DD
-
-### Summary
-[2-3 sentences: What was the goal? Did we achieve it? Anything unexpected?]
-
-### Progress Made
-- [Concrete deliverable 1]
-- [Concrete deliverable 2]
-
-### Decisions & Rationale
-| Decision | Rationale | Needs Validation? |
-|----------|-----------|-------------------|
-| [Choice made] | [Why this approach] | Yes/No |
-
-### Alignment Check
-- On track with vision: [Yes/Concerns]
-- Scope changes: [None/Description]
-
-### Next Session Priorities
-1. [Priority 1]
-2. [Priority 2]
-
-### Technical Appendix
-
-<details>
-<summary>Commits</summary>
-
-| Hash | Message |
-|------|---------|
-| abc1234 | feat: add X |
-
-</details>
-
-<details>
-<summary>Files Changed</summary>
-
-- Added: `path/to/file.md`
-- Modified: `path/to/other.md`
-
-</details>
-
--->
