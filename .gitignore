@@ -1,0 +1,28 @@
+# Generated PDFs (downloaded from Releases instead)
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Python (for future code)
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv/
+venv/
+*.egg-info/
+
+# Node (for future tooling)
+node_modules/
+
+# Temporary session placeholder (can be deleted)
+drop/

@@ -1,0 +1,106 @@
+name: Generate PDFs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**/*.md'
+      - '.github/workflows/generate-pdfs.yml'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  build-pdfs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pandoc and LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended
+
+      - name: Create dist directories
+        run: |
+          mkdir -p dist/core dist/water dist/influencer
+
+      - name: Generate PDFs from packages/core
+        run: |
+          for f in packages/core/*.md; do
+            if [ -f "$f" ]; then
+              filename=$(basename "$f" .md)
+              echo "Converting $f to PDF..."
+              pandoc "$f" \
+                -o "dist/core/${filename}.pdf" \
+                --pdf-engine=xelatex \
+                -V geometry:margin=1in \
+                -V fontsize=11pt \
+                --toc \
+                --toc-depth=2 \
+                -V colorlinks=true \
+                -V linkcolor=blue \
+                -V urlcolor=blue \
+                || echo "Warning: Failed to convert $f"
+            fi
+          done
+
+      - name: Generate PDFs from packages/water
+        run: |
+          for f in packages/water/*.md; do
+            if [ -f "$f" ]; then
+              filename=$(basename "$f" .md)
+              echo "Converting $f to PDF..."
+              pandoc "$f" \
+                -o "dist/water/${filename}.pdf" \
+                --pdf-engine=xelatex \
+                -V geometry:margin=1in \
+                -V fontsize=11pt \
+                --toc \
+                --toc-depth=2 \
+                -V colorlinks=true \
+                -V linkcolor=blue \
+                -V urlcolor=blue \
+                || echo "Warning: Failed to convert $f"
+            fi
+          done
+
+      - name: Generate PDFs from packages/influencer
+        run: |
+          for f in packages/influencer/*.md; do
+            if [ -f "$f" ]; then
+              filename=$(basename "$f" .md)
+              echo "Converting $f to PDF..."
+              pandoc "$f" \
+                -o "dist/influencer/${filename}.pdf" \
+                --pdf-engine=xelatex \
+                -V geometry:margin=1in \
+                -V fontsize=11pt \
+                --toc \
+                --toc-depth=2 \
+                -V colorlinks=true \
+                -V linkcolor=blue \
+                -V urlcolor=blue \
+                || echo "Warning: Failed to convert $f"
+            fi
+          done
+
+      - name: List generated PDFs
+        run: |
+          echo "Generated PDFs:"
+          find dist -name "*.pdf" -type f
+
+      - name: Upload PDFs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-pdfs
+          path: dist/
+          retention-days: 90
+
+      - name: Create Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/**/*.pdf
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
