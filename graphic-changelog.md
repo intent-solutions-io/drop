@@ -11,26 +11,26 @@ Each session adds new diagrams showing the state at that point in time.
 
 * * *
 
-## Session: 2026-01-09
+## Session: Jan-09-2026
 
 ### Technical Architecture Overview
 _System architecture showing client, compute, AI/ML, and data layers._
 
-![arch-simple](graphics/2026-01-09-arch-simple.png)
+![arch-simple](graphics/Jan-09-2026-arch-simple.png)
 
 ### GCP Infrastructure Architecture
 _Production cloud infrastructure with Vertex AI, Cloud Run, and data services._
 
-![architecture](graphics/2026-01-09-architecture.png)
+![architecture](graphics/Jan-09-2026-architecture.png)
 
 ### Session Progress Metrics
 _Current session statistics and workflow status._
 
-![progress](graphics/2026-01-09-progress.png)
+![progress](graphics/Jan-09-2026-progress.png)
 
 ### Session Workflow Pipeline
 _End-to-session automation from code changes through delivery._
 
-![workflow](graphics/2026-01-09-workflow.png)
+![workflow](graphics/Jan-09-2026-workflow.png)
 
 * * *

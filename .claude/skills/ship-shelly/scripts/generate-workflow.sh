@@ -16,7 +16,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${PROJECT_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || dirname "$SCRIPT_DIR"/../../..)}"
-DATE_STR=$(date +%Y-%m-%d)
+DATE_STR=$(date +%b-%d-%Y)
 OUTPUT_DIR="${1:-$PROJECT_ROOT/graphics}"
 
 mkdir -p "$OUTPUT_DIR"

@@ -38,7 +38,7 @@ from diagrams.custom import Custom
 def generate_architecture(output_path: str = None):
     """Generate the Creative Wheel House architecture diagram."""
 
-    date_str = datetime.now().strftime("%Y-%m-%d")
+    date_str = datetime.now().strftime("%b-%d-%Y")
 
     if output_path is None:
         graphics_dir = PROJECT_ROOT / "graphics"

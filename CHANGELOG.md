@@ -1,154 +1,218 @@
 # Creative Wheel House - Progress Log
 
-All notable progress on this collaboration is documented here.
+The canonical record of this collaboration between Jeremy Longshore (Intent Solutions) and Creative House Studios (Glen Kerby, Shelly Frank).
 
-This changelog serves as the official record for C-level review. Each entry captures:
-- Session summary and goals
-- Progress made (concrete deliverables)
-- Decisions and rationale
-- Alignment checks
-- Next session priorities
+This document is sent in full with each progress update. It serves as both changelog and project reference.
 
 * * *
 
-## Session: 2026-01-09 (Evening)
+# Project Overview
+
+## What We're Building
+
+**Creative Wheel House** is a multi-domain credibility infrastructure built on the **Situation Graph** framework.
+
+**Core idea:** A system for tracking "things happening somewhere over time with evidence." Every claim must be backed by evidence with provenance. No silent rewrites. Append-only history. Audit everything.
+
+**Why it matters:** Current information systems let anyone publish anything. We're building the opposite - a framework where truth is engineered, not assumed. AI helps draft; humans and deterministic gates control what gets published.
+
+## The Situation Graph Framework
+
+The heart of the project is a domain-agnostic framework with these core entities:
+
+| Entity | Purpose |
+|--------|---------|
+| **Node** | The thing being tracked (Location, Creator, Brand, Asset) |
+| **Situation** | Evolving state about a Node (what's happening now) |
+| **Claim** | Structured assertion with required type classification |
+| **Evidence** | Source artifacts supporting/contradicting claims |
+| **Assessment** | Verification level + bounded confidence + reviewer identity |
+| **Revision** | Append-only change record (no silent overwrites) |
+| **Endorsement** | External reference/backlink/mention |
+| **Policy** | Rules gating actions (publish/outreach/visibility) |
+
+**Non-negotiables (from the spec):**
+- Fail closed on missing evidence anchors
+- Append-only revisions (no silent overwrites)
+- No outreach on stale/conflict/ambiguous items
+- Quarantine public submissions until verified
+- Policy gates enforced in code, not prompts
+- Audit logs are immutable
+- AI is copilot, never autopilot
+
+## Domain Packs
+
+The framework is domain-agnostic. Each domain implements it via a **Domain Pack** that defines:
+- What entities are tracked (Nodes)
+- What events happen
+- How things are verified
+- How fast things go stale
+
+**Current domains:**
+- **Water ($drop)** - Water quality tracking, the pilot domain (IDLW)
+- **Influencer** - Creator credibility tracking (planned)
+
+* * *
+
+# Repository Structure
+
+```
+creative-wheel-house/
+├── packages/
+│   ├── core/                          # Domain-agnostic framework
+│   │   ├── Situation-Graph-Spec-v00.00.01.md    # THE master spec
+│   │   └── Domain-Pack-Template-v00.00.01.md    # Template for new domains
+│   │
+│   ├── water/                         # Water domain pack ($drop)
+│   │   └── Water-Drop-Master-Plan-v00.04.05.md  # Water implementation
+│   │
+│   └── influencer/                    # Influencer domain (planned)
+│
+├── _originals/                        # Historical planning docs
+│   └── drop/                          # Original planning materials
+│
+├── graphics/                          # Generated diagrams
+│   └── [date]-*.png                   # Session diagrams
+│
+├── dist/                              # Auto-generated PDFs
+│
+├── .claude/                           # Claude Code configuration
+│   └── skills/
+│       └── ship-shelly/               # Progress report automation
+│           ├── SKILL.md               # Skill definition
+│           ├── scripts/               # Automation scripts
+│           └── templates/             # PDF templates
+│
+├── CHANGELOG.md                       # This file (canonical record)
+├── CLAUDE.md                          # Project instructions for Claude
+├── README.md                          # Quick reference
+└── graphic-changelog.md               # Visual evolution timeline
+```
+
+## What Each Directory Contains
+
+### packages/core/
+The domain-agnostic master framework. This is where the Situation Graph spec lives - the core entities, verification gates, and non-negotiable rules that apply to ALL domains.
+
+**Key files:**
+- `Situation-Graph-Spec-v00.00.01.md` - The master specification defining Nodes, Situations, Claims, Evidence, Assessments, Revisions, Endorsements, and Policies
+- `Domain-Pack-Template-v00.00.01.md` - Template for creating new domain implementations
+
+### packages/water/
+The water domain pack, implementing the Situation Graph for water quality tracking. This is the pilot domain (IDLW - International Day of Living Water).
+
+**Key files:**
+- `Water-Drop-Master-Plan-v00.04.05.md` - Complete implementation plan including Truth Integrity Doctrine, Evidence Anchoring, Claim Types, Deterministic Gates, and MVP requirements
+
+### packages/influencer/
+Planned domain pack for creator/influencer credibility tracking. Currently empty - will be implemented after water domain is validated.
+
+### .claude/skills/ship-shelly/
+Automation for sending progress reports to Shelly. Generates professional PDFs, diagrams, and emails.
+
+**Components:**
+- `SKILL.md` - 12-step automation workflow definition
+- `scripts/generate-architecture.py` - GCP architecture diagrams with official cloud icons
+- `scripts/generate-workflow.sh` - D2 workflow diagrams
+- `scripts/send-email.py` - Resend API email delivery
+- `templates/cwh-report.latex` - Professional PDF template
+
+* * *
+
+# Technology Stack (When Building)
+
+```
+Language:        Python 3.11+
+Framework:       FastAPI + ADK (Google Agent Development Kit)
+Models:          Claude + Gemini via Vertex AI
+Database:        Firestore (real-time) + BigQuery (analytics)
+Infrastructure:  OpenTofu on Google Cloud
+Deployment:      Cloud Run + Vertex AI Agent Engine
+```
+
+* * *
+
+# Session History
+
+## Session: Jan-09-2026 (Evening)
 
 ### Summary
 
-Enhanced the `/ship-shelly` skill with professional diagram generation and fixed a critical issue with API key management. The `pass` password store requires GPG pinentry GUI which doesn't work in terminal-only environments, so we switched to `.env` file based configuration.
+Enhanced the `/ship-shelly` skill with professional diagram generation and fixed critical issues with API key management and PDF generation.
 
 ### Progress Made
 
 - **Diagram Generation Scripts**: Added Python script for GCP architecture diagrams using official cloud icons, and bash scripts for D2 workflow diagrams
 - **Visual Changelog**: New cumulative visual timeline showing project evolution through diagrams
-- **API Key Fix**: Switched from `pass` to `.env` for Resend API key (pass requires GUI which fails in headless terminals)
+- **API Key Fix**: Switched from `pass` to `.env` for Resend API key (pass requires GPG pinentry GUI unavailable in headless terminals)
 - **PDF Generation Fix**: Fixed YAML parsing issue in pandoc by using `* * *` instead of `---` for horizontal rules
+- **Comprehensive CHANGELOG**: Rewrote this document to be the canonical reference for the entire project
 
-### Decisions & Rationale
+### Decisions Made
 
-| Decision | Rationale | Needs Validation? |
-|----------|-----------|-------------------|
-| Switch from `pass` to `.env` for API keys | `pass` requires GPG pinentry GUI unavailable in terminal; `.env` works reliably | No |
-| Use `* * *` for horizontal rules | Avoids pandoc confusing `---` with YAML front matter | No |
-| Add 4 diagram types per session | Architecture (GCP icons), workflow, progress metrics, simplified architecture | No |
+| Decision | Rationale |
+|----------|-----------|
+| Switch from `pass` to `.env` for API keys | `pass` requires GPG pinentry GUI; `.env` works in all terminals |
+| Use `* * *` for horizontal rules | Avoids pandoc confusing `---` with YAML front matter |
+| Date format: `Jan-09-2026` | More readable than ISO format |
+| Lowercase `graphic-changelog` | Standard naming convention |
+| CHANGELOG as canonical doc | Single source of truth sent in full each time |
 
-### Alignment Check
+### Next Priorities
 
-- **On track with vision**: Yes - making the automation more robust and visually rich
-- **Scope changes**: None - incremental improvements to existing tooling
-
-### Next Session Priorities
-
-1. **Send first test email**: Verify the complete pipeline works end-to-end
-2. **Add Shelly to GitHub**: Still need her GitHub username
-3. **Begin Water Drop implementation**: Once collaboration access confirmed
-
-### Technical Appendix
-
-<details>
-<summary>Commits</summary>
-
-| Hash | Message |
-|------|---------|
-| 049f013 | feat(ship-shelly): switch API key from pass to .env, add diagram scripts |
-
-</details>
-
-<details>
-<summary>Files Changed</summary>
-
-**Added:**
-- `.claude/skills/ship-shelly/scripts/generate-architecture.py` - GCP diagram with official icons
-- `.claude/skills/ship-shelly/scripts/generate-workflow.sh` - D2 workflow diagrams
-- `.claude/skills/ship-shelly/scripts/update-graphic-log.sh` - Visual changelog updater
-- `graphics/*.png` - Generated diagram files
-- `GRAPHIC-CHANGELOG.md` - Cumulative visual timeline
-
-**Modified:**
-- `.claude/skills/ship-shelly/SKILL.md` - Updated docs for .env, added diagram generation phases
-- `.claude/skills/ship-shelly/scripts/send-email.py` - Support multiple attachments, .env fallback
-- `.claude/skills/ship-shelly/templates/cwh-report.latex` - Template improvements
-
-</details>
+1. Complete first successful test email delivery
+2. Get Shelly's GitHub username for repo access
+3. Begin Water Drop implementation once collaboration access confirmed
 
 * * *
 
-## Session: 2026-01-09
+## Session: Jan-09-2026
 
 ### Summary
 
-Built the `/ship-shelly` skill - an end-of-session automation that packages progress updates into professional PDF reports and emails them directly to Shelly. This is the first piece of operational infrastructure for our collaboration, ensuring consistent communication without manual report writing.
+Built the `/ship-shelly` skill - an end-of-session automation that packages progress updates into professional PDF reports and emails them directly to Shelly. This is the first piece of operational infrastructure for our collaboration.
 
 ### Progress Made
 
-- **Ship-Shelly Skill**: Complete 12-step automation workflow that commits changes, writes changelog entries, generates professional PDFs, and sends personalized emails
-- **Professional PDF Template**: Custom LaTeX template with Creative Wheel House branding (pandoc + xelatex)
-- **Email Integration**: Resend API integration with test mode flag for safe testing
+- **Ship-Shelly Skill**: Complete 12-step automation workflow (commit, PR, changelog, PDF, email)
+- **Professional PDF Template**: Custom LaTeX template with Creative Wheel House branding
+- **Email Integration**: Resend API integration with test mode for safe development
 - **Validation-Compliant**: Skill passes all enterprise standard checks
 
-### Decisions & Rationale
+### Decisions Made
 
-| Decision | Rationale | Needs Validation? |
-|----------|-----------|-------------------|
-| Pandoc + xelatex for PDFs | Best Unicode support, professional output, widely available | No |
-| Claude writes changelog/email (not templates) | Leverages AI for natural language vs rigid templating - more human, less robotic | Yes |
-| Test mode sends only to Jeremy | Safe testing without accidentally emailing Shelly during development | No |
+| Decision | Rationale |
+|----------|-----------|
+| Pandoc + xelatex for PDFs | Best Unicode support, professional output |
+| Claude writes changelog/email | Natural language vs rigid templating |
+| Test mode sends only to Jeremy | Safe testing without accidentally emailing Shelly |
 
-### Alignment Check
+### Files Created
 
-- **On track with vision**: Yes - building infrastructure to support deliberate, well-documented collaboration
-- **Scope changes**: None - this was planned as operational tooling
-
-### Next Session Priorities
-
-1. **Add Shelly to GitHub**: Need her GitHub username to add to repo/organization
-2. **Test email workflow**: Send first test email to verify PDF attachment works
-3. **Review Water Drop plan**: Continue with v00.04.05 master plan once collaboration access is set up
-
-**Question for Shelly**: What's your GitHub username so we can add you to the repository?
-
-### Technical Appendix
-
-<details>
-<summary>Commits</summary>
-
-| Hash | Message |
-|------|---------|
-| 7ab1d5b | feat: add /ship-shelly skill for progress reports to Shelly |
-
-</details>
-
-<details>
-<summary>Files Changed</summary>
-
-**Added:**
-- `.claude/skills/ship-shelly/SKILL.md` - Main skill definition (375 lines)
-- `.claude/skills/ship-shelly/scripts/generate-pdf.sh` - Pandoc wrapper
-- `.claude/skills/ship-shelly/scripts/send-email.py` - Resend API integration
-- `.claude/skills/ship-shelly/templates/cwh-report.latex` - PDF template
-- `.claude/skills/ship-shelly/templates/changelog-entry.md` - Entry reference
-- `.claude/skills/ship-shelly/references/pandoc-options.md` - Config reference
+- `.claude/skills/ship-shelly/` - Complete skill with scripts and templates
 - `CHANGELOG.md` - This progress log
 - `packages/water/Water-Drop-Master-Plan-v00.04.05.md` - Water Drop master plan
 
-**Modified:**
-- `.gitignore` - Added PDF and build artifacts
+* * *
 
-</details>
+# Questions for Shelly
 
-<details>
-<summary>Metrics</summary>
-
-| Metric | Value |
-|--------|-------|
-| Files Changed | 9 |
-| Lines Added | ~2,000 |
-| New Skill | ship-shelly |
-
-</details>
+1. **GitHub access**: What's your GitHub username so we can add you to the repository?
+2. **Changelog approach**: Does this comprehensive format work for you, or would you prefer something different?
+3. **Validation needed**: The spec says "Claude writes changelog/email (not templates)" needs validation - are you comfortable with AI-generated natural language reports?
 
 * * *
 
-## [Unreleased]
+# How to Use This Document
 
-*No unreleased changes yet.*
+**For quick updates:** Read the most recent Session entry (at the top of Session History)
+
+**For context:** Read Project Overview and Repository Structure
+
+**For deep dives:** The full specs are in `packages/core/` and `packages/water/`
+
+**To respond:** Reply to the email with questions, feedback, or concerns
+
+* * *
+
+*This document is sent in full with each progress update.*

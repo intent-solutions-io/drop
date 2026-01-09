@@ -9,15 +9,15 @@
 #     ./update-graphic-log.sh [date]
 #
 # Output:
-#     GRAPHIC-CHANGELOG.md (updated)
-#     GRAPHIC-CHANGELOG.pdf (regenerated)
+#     graphic-changelog.md (updated)
+#     graphic-changelog.pdf (regenerated)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="${PROJECT_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || dirname "$SCRIPT_DIR"/../../..)}"
-DATE_STR="${1:-$(date +%Y-%m-%d)}"
-GRAPHIC_LOG="$PROJECT_ROOT/GRAPHIC-CHANGELOG.md"
+DATE_STR="${1:-$(date +%b-%d-%Y)}"
+GRAPHIC_LOG="$PROJECT_ROOT/graphic-changelog.md"
 GRAPHICS_DIR="$PROJECT_ROOT/graphics"
 TEMPLATE_DIR="$SCRIPT_DIR/../templates"
 
@@ -138,7 +138,7 @@ echo "Added ${#diagrams[@]} diagrams for session $DATE_STR"
 # ============================================================================
 
 if command -v pandoc &>/dev/null; then
-    PDF_OUTPUT="$PROJECT_ROOT/GRAPHIC-CHANGELOG.pdf"
+    PDF_OUTPUT="$PROJECT_ROOT/graphic-changelog.pdf"
 
     pandoc "$GRAPHIC_LOG" \
         -o "$PDF_OUTPUT" \

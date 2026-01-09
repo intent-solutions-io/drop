@@ -63,7 +63,7 @@ Detect project root and establish working context:
 ```bash
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 cd "$PROJECT_ROOT"
-DATE_STR=$(date +%Y-%m-%d)
+DATE_STR=$(date +%b-%d-%Y)  # Format: Jan-09-2026
 echo "Ship Shelly - Session $DATE_STR"
 echo "Working from: $PROJECT_ROOT"
 ```
@@ -97,7 +97,7 @@ source "$PROJECT_ROOT/.venv/bin/activate"
 python3 {baseDir}/scripts/generate-architecture.py "$PROJECT_ROOT/graphics/$DATE_STR-architecture"
 ```
 
-Output: `graphics/YYYY-MM-DD-architecture.png` - Professional GCP infrastructure diagram showing Vertex AI, Cloud Run, Firestore, BigQuery, Cloud Storage.
+Output: `graphics/Mon-DD-YYYY-architecture.png` - Professional GCP infrastructure diagram showing Vertex AI, Cloud Run, Firestore, BigQuery, Cloud Storage.
 
 **3b. Workflow Diagrams** (D2):
 ```bash
@@ -105,9 +105,9 @@ Output: `graphics/YYYY-MM-DD-architecture.png` - Professional GCP infrastructure
 ```
 
 Output:
-- `graphics/YYYY-MM-DD-workflow.png` - Session automation pipeline
-- `graphics/YYYY-MM-DD-progress.png` - Session metrics and status
-- `graphics/YYYY-MM-DD-arch-simple.png` - D2 architecture overview
+- `graphics/Mon-DD-YYYY-workflow.png` - Session automation pipeline
+- `graphics/Mon-DD-YYYY-progress.png` - Session metrics and status
+- `graphics/Mon-DD-YYYY-arch-simple.png` - D2 architecture overview
 
 ### Phase 4: Write Changelog Entry
 
@@ -129,7 +129,7 @@ git diff --stat $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~20").
 
 2. **Progress Made** (concrete deliverables)
    - New capabilities, completed work
-   - Include relevant diagram references: `![Architecture](graphics/YYYY-MM-DD-architecture.png)`
+   - Include relevant diagram references: `![Architecture](graphics/Mon-DD-YYYY-architecture.png)`
 
 3. **Decisions & Rationale** (critical for collaboration)
    - Choices made and why
@@ -163,8 +163,8 @@ Append session diagrams to cumulative visual timeline:
 ```
 
 This creates/updates:
-- `GRAPHIC-CHANGELOG.md` - Markdown with all session diagrams
-- `GRAPHIC-CHANGELOG.pdf` - Cumulative visual timeline PDF
+- `graphic-changelog.md` - Markdown with all session diagrams
+- `graphic-changelog.pdf` - Cumulative visual timeline PDF
 
 ### Phase 6: Generate Session Report PDF
 
@@ -189,7 +189,7 @@ Template: `{baseDir}/templates/cwh-report.latex`
 ```bash
 # Check PDF exists and has content
 ls -la "$PROJECT_ROOT/changelog-$DATE_STR.pdf"
-ls -la "$PROJECT_ROOT/GRAPHIC-CHANGELOG.pdf"
+ls -la "$PROJECT_ROOT/graphic-changelog.pdf"
 
 # Check page count (pdfinfo if available)
 pdfinfo "$PROJECT_ROOT/changelog-$DATE_STR.pdf" 2>/dev/null | grep Pages
@@ -199,11 +199,11 @@ pdfinfo "$PROJECT_ROOT/changelog-$DATE_STR.pdf" 2>/dev/null | grep Pages
 ```
 PDF VALIDATION
 ---------------------------------------------
-Session Report: changelog-YYYY-MM-DD.pdf
+Session Report: changelog-Mon-DD-YYYY.pdf
   Size: [X] KB
   Pages: [Y]
 
-Visual Evolution: GRAPHIC-CHANGELOG.pdf
+Visual Evolution: graphic-changelog.pdf
   Size: [X] KB
   Pages: [Y]
 
@@ -255,20 +255,20 @@ python3 {baseDir}/scripts/send-email.py \
     --subject "Creative Wheel House Progress - $DATE_STR" \
     --body "$EMAIL_BODY" \
     --attachment "$PROJECT_ROOT/changelog-$DATE_STR.pdf" \
-    --attachment "$PROJECT_ROOT/GRAPHIC-CHANGELOG.pdf"
+    --attachment "$PROJECT_ROOT/graphic-changelog.pdf"
 
 # Test mode (sends to Jeremy only)
 python3 {baseDir}/scripts/send-email.py --test \
     --subject "Creative Wheel House Progress - $DATE_STR" \
     --body "$EMAIL_BODY" \
     --attachment "$PROJECT_ROOT/changelog-$DATE_STR.pdf" \
-    --attachment "$PROJECT_ROOT/GRAPHIC-CHANGELOG.pdf"
+    --attachment "$PROJECT_ROOT/graphic-changelog.pdf"
 ```
 
 ### Phase 11: Commit and Confirm
 
 ```bash
-git add CHANGELOG.md GRAPHIC-CHANGELOG.md GRAPHIC-CHANGELOG.pdf graphics/
+git add CHANGELOG.md graphic-changelog.md graphic-changelog.pdf graphics/
 git commit -m "docs: session report $DATE_STR"
 git push origin main
 ```
@@ -283,13 +283,13 @@ Sweep Phase
   Branches cleaned: [Y]
 
 Diagrams Generated
-  GCP Architecture: graphics/YYYY-MM-DD-architecture.png
-  Workflow: graphics/YYYY-MM-DD-workflow.png
-  Progress: graphics/YYYY-MM-DD-progress.png
+  GCP Architecture: graphics/Mon-DD-YYYY-architecture.png
+  Workflow: graphics/Mon-DD-YYYY-workflow.png
+  Progress: graphics/Mon-DD-YYYY-progress.png
 
 Reports Generated
-  Session Report: changelog-YYYY-MM-DD.pdf ([size])
-  Visual Evolution: GRAPHIC-CHANGELOG.pdf ([size])
+  Session Report: changelog-Mon-DD-YYYY.pdf ([size])
+  Visual Evolution: graphic-changelog.pdf ([size])
 
 Email Sent
   To: shelly@shellyfrank.com
@@ -307,15 +307,15 @@ Session Metrics
 
 **Files created/updated:**
 - `CHANGELOG.md` - Session entry prepended
-- `GRAPHIC-CHANGELOG.md` - Visual timeline updated
-- `GRAPHIC-CHANGELOG.pdf` - Cumulative diagrams PDF
-- `changelog-YYYY-MM-DD.pdf` - Session report PDF
-- `graphics/YYYY-MM-DD-*.png` - Session diagrams
+- `graphic-changelog.md` - Visual timeline updated
+- `graphic-changelog.pdf` - Cumulative diagrams PDF
+- `changelog-Mon-DD-YYYY.pdf` - Session report PDF
+- `graphics/Mon-DD-YYYY-*.png` - Session diagrams
 
 **Email delivered:**
 - **To:** shelly@shellyfrank.com
 - **CC:** jeremy@intentsolutions.io
-- **Subject:** Creative Wheel House Progress - YYYY-MM-DD
+- **Subject:** Creative Wheel House Progress - Mon-DD-YYYY
 - **Attachments:**
   1. Session Report PDF (text + embedded diagrams)
   2. Visual Evolution PDF (cumulative diagrams only)
@@ -338,7 +338,7 @@ Session Metrics
 ```
 /ship-shelly
 
-Ship Shelly - Session 2026-01-09
+Ship Shelly - Session Jan-09-2026
 Working from: /home/jeremy/000-projects/creative-wheel-house
 
 SWEEP PHASE
@@ -349,20 +349,20 @@ SWEEP PHASE
   Cleaned 2 stale branches
 
 DIAGRAM GENERATION
-  GCP Architecture: graphics/2026-01-09-architecture.png (94 KB)
-  Workflow: graphics/2026-01-09-workflow.png (234 KB)
-  Progress: graphics/2026-01-09-progress.png (116 KB)
+  GCP Architecture: graphics/Jan-09-2026-architecture.png (94 KB)
+  Workflow: graphics/Jan-09-2026-workflow.png (234 KB)
+  Progress: graphics/Jan-09-2026-progress.png (116 KB)
 
 CHANGELOG
-  Entry written: 2026-01-09
+  Entry written: Jan-09-2026
   Diagrams embedded inline
 
 VISUAL CHANGELOG
-  Updated: GRAPHIC-CHANGELOG.md
-  Generated: GRAPHIC-CHANGELOG.pdf (4 pages)
+  Updated: graphic-changelog.md
+  Generated: graphic-changelog.pdf (4 pages)
 
 PDF GENERATION
-  Session Report: changelog-2026-01-09.pdf (312 KB, 3 pages)
+  Session Report: changelog-Jan-09-2026.pdf (312 KB, 3 pages)
 
 VALIDATION
   [S]end to Shelly? > S
