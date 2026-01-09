@@ -99,7 +99,7 @@ The domain-agnostic master framework. This is where the CHS Credibility Spine sp
 - `Domain-Pack-Template-v00.00.01.md` - Template for creating new domain implementations
 
 ### packages/water/
-The water domain pack, implementing the CHS Credibility Spine for water quality tracking. This is the pilot domain (IDLW - International Day of Living Water).
+The water domain pack, implementing the CHS Credibility Spine for water quality tracking. This is the pilot domain (IDLW - I Drink Living Water).
 
 **Key files:**
 - `Water-Drop-Master-Plan-v00.04.05.md` - Complete implementation plan including Truth Integrity Doctrine, Evidence Anchoring, Claim Types, Deterministic Gates, and MVP requirements
