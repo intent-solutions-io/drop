@@ -1,5 +1,13 @@
-# Generated PDFs (downloaded from Releases instead)
+# Generated files
 dist/
+
+# Secrets and config (NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+secrets/
+*.key
+resend.json
 
 # OS files
 .DS_Store
@@ -16,7 +24,6 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 *$py.class
-.env
 .venv/
 venv/
 *.egg-info/
