@@ -1,375 +1,406 @@
 ---
 name: ship-shelly
 description: |
-  End-of-session progress report automation for Creative Wheel House collaboration.
-  Works from any nested directory (packages/water/, packages/core/, etc.) - auto-detects
-  project root. Executes sweep phase (commit, PR creation, Gemini review gate, merge,
-  branch cleanup), prepares C-level changelog with diagrams and metrics, generates
-  professional PDF via pandoc/xelatex, and sends personalized email to Shelly via Resend.
-  Use when session work is complete and ready to ship progress update. Trigger with
-  phrases like "/ship-shelly", "send update to shelly", "ship progress", "email shelly".
-allowed-tools: "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(pandoc:*),Bash(python:*),Task,Skill,AskUserQuestion"
+  Enterprise-grade end-of-session progress automation for Creative Wheel House.
+  Executes complete delivery pipeline: sweep (commit, PR, review gate, merge),
+  generates professional PDF reports with embedded GCP architecture diagrams
+  (Vertex AI, Cloud Run, BigQuery), creates cumulative visual changelog with
+  D2 workflow diagrams, and delivers multi-attachment email via Resend.
+  Use when session work is complete and ready for C-suite delivery. Trigger
+  with phrases like "/ship-shelly", "ship to shelly", "send progress update".
+allowed-tools: "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(pandoc:*),Bash(python:*),Bash(d2:*),Bash(chmod:*),Bash(ls:*),Bash(cat:*),Task,Skill,AskUserQuestion"
 model: claude-opus-4-5-20251101
-version: 1.0.0
+version: 2.0.0
 author: Jeremy Longshore <jeremy@intentsolutions.io>
 license: MIT
 ---
 
-# Ship Shelly - End-of-Session Progress Report Automation
+# Ship Shelly - Enterprise Progress Delivery System
 
-Send comprehensive progress updates to Shelly with professional PDF attachments.
+Automated end-of-session delivery pipeline for C-suite stakeholders.
 
 ## Overview
 
-This skill automates the end-of-session workflow for Creative Wheel House:
+This skill delivers professional progress updates to Creative Wheel House stakeholders (Shelly Frank, Glen Kerby) with enterprise-grade presentation quality.
 
-1. **Sweep Phase**: Commit changes, create PRs, enforce Gemini Code Assistant review, merge approved PRs, clean stale branches
-2. **Changelog Phase**: Analyze commits and session activity, write C-level changelog entry with diagrams, metrics, and context
-3. **PDF Phase**: Generate professional PDF using pandoc with custom LaTeX template
-4. **Email Phase**: Compose personalized email and send via Resend with PDF attachment
+**What gets delivered:**
 
-The changelog captures progress, decisions, and alignment for executive review. Email body is written fresh each time (not templated) with natural language summary.
+| Attachment | Purpose | Content |
+|------------|---------|---------|
+| **Session Report PDF** | Complete narrative | Text + embedded diagrams (architecture, workflows) |
+| **Visual Evolution PDF** | Project timeline | Cumulative diagram history (scroll to see evolution) |
+
+**Technology stack:**
+- **Diagrams (Python)** - GCP architecture with official cloud icons (Vertex AI, Cloud Run, BigQuery, Firestore)
+- **D2** - Modern workflow diagrams with professional styling
+- **Pandoc + XeLaTeX** - Publication-quality PDF output
+- **Resend API** - Reliable email delivery with attachments
 
 ## Prerequisites
 
-**Required Skills:**
-- `/sweep` - Repository housekeeping (global skill)
-- `/release` - Release automation (global skill)
-
 **System Requirements:**
-- pandoc 3.x with xelatex PDF engine
-- Python 3.11+ with `resend` package
-- `pass` password store with `apis/resend-api-key` entry
-
-**Verify Prerequisites:**
 ```bash
-pandoc --version | head -1
-python3 -c "import resend; print('resend OK')"
-pass apis/resend-api-key > /dev/null && echo "API key OK"
+# Verify all prerequisites
+pandoc --version | head -1                    # pandoc 3.x
+~/.local/bin/d2 --version                     # D2 v0.7+
+source .venv/bin/activate && python3 -c "import diagrams; print('diagrams OK')"
+grep -q RESEND_API_KEY .env && echo "API key OK"
 ```
+
+**Required tools:**
+- pandoc 3.x with xelatex engine
+- D2 diagram tool (~/.local/bin/d2)
+- Python venv with: diagrams, resend packages
+- graphviz (for diagrams library)
+- `.env` file with `RESEND_API_KEY=re_xxx` (project root)
 
 ## Instructions
 
-### Step 1: Detect Project Root
+### Phase 1: Initialize Session
 
-This skill can be invoked from any subdirectory within creative-wheel-house (e.g., packages/water/, packages/core/).
+Detect project root and establish working context:
 
-Detect project root using git:
 ```bash
 PROJECT_ROOT=$(git rev-parse --show-toplevel)
 cd "$PROJECT_ROOT"
+DATE_STR=$(date +%Y-%m-%d)
+echo "Ship Shelly - Session $DATE_STR"
 echo "Working from: $PROJECT_ROOT"
 ```
 
-All subsequent operations use `$PROJECT_ROOT` for:
-- CHANGELOG.md location
-- PDF output location
-- Git operations
+### Phase 2: Repository Sweep
 
-### Step 2: Check Repository State
-
-Run git status to identify uncommitted changes. If changes exist, prompt whether to commit.
+Check repository state and prepare for delivery:
 
 ```bash
+# Check state
 git status --porcelain
-git log --oneline -5
+git log --oneline -10
+
+# If uncommitted changes exist:
+# 1. Create feature branch (if on main)
+# 2. Commit with descriptive message
+# 3. Create PR via gh cli
+# 4. GATE: Wait for review (Gemini Code Assistant)
+# 5. Merge after approval only
 ```
 
-### Step 3: Execute Sweep Phase
+**Non-negotiable:** Every change must go through PR review before merge.
 
-Invoke the `/sweep` skill with PR-first workflow enforcement:
+### Phase 3: Generate Diagrams
 
-1. Create branch from current work if on main
-2. Commit all changes with descriptive message
-3. Create pull request via `gh pr create`
-4. **GATE**: Wait for Gemini Code Assistant review on PR
-5. Only merge after approval received
-6. Delete merged branches and stale branches (>30 days)
+Execute diagram generation scripts to create professional visuals.
 
+**3a. GCP Architecture Diagram** (with official cloud icons):
 ```bash
-# Example PR creation
-gh pr create --title "Session work: [date]" --body "[description]"
-
-# Check for Gemini review
-gh pr checks [PR_NUMBER]
+source "$PROJECT_ROOT/.venv/bin/activate"
+python3 {baseDir}/scripts/generate-architecture.py "$PROJECT_ROOT/graphics/$DATE_STR-architecture"
 ```
 
-### Step 4: Execute Release Phase (Light)
+Output: `graphics/YYYY-MM-DD-architecture.png` - Professional GCP infrastructure diagram showing Vertex AI, Cloud Run, Firestore, BigQuery, Cloud Storage.
 
-Invoke `/release` in light mode - validate state, tag if warranted.
-
-### Step 5: Gather Session Data
-
-Collect information for changelog:
-
+**3b. Workflow Diagrams** (D2):
 ```bash
-# Commits since last changelog entry
-git log --oneline [LAST_TAG]..HEAD
+{baseDir}/scripts/generate-workflow.sh "$PROJECT_ROOT/graphics"
+```
+
+Output:
+- `graphics/YYYY-MM-DD-workflow.png` - Session automation pipeline
+- `graphics/YYYY-MM-DD-progress.png` - Session metrics and status
+- `graphics/YYYY-MM-DD-arch-simple.png` - D2 architecture overview
+
+### Phase 4: Write Changelog Entry
+
+Analyze session data and WRITE comprehensive changelog entry (natural language generation, not template filling).
+
+**Gather data:**
+```bash
+# Commits since last entry
+git log --oneline $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~20")..HEAD
 
 # Files changed
-git diff --stat [LAST_TAG]..HEAD
-
-# Session duration (if tracked)
-# Decisions made (from conversation context)
+git diff --stat $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~20")..HEAD
 ```
 
-### Step 6: Gather User Input (for email, not changelog)
+**Entry structure (C-suite optimized):**
 
-Before composing the email, ask the user for personal notes to Shelly:
+1. **Session Summary** (2-3 sentences)
+   - Goal, achievement, surprises
+
+2. **Progress Made** (concrete deliverables)
+   - New capabilities, completed work
+   - Include relevant diagram references: `![Architecture](graphics/YYYY-MM-DD-architecture.png)`
+
+3. **Decisions & Rationale** (critical for collaboration)
+   - Choices made and why
+   - **Flag decisions needing validation**
+
+4. **Technical Architecture** (with embedded diagrams)
+   - Include GCP architecture diagram
+   - Show infrastructure evolution
+
+5. **Alignment Check**
+   - On track with vision?
+   - Scope changes or pivots?
+
+6. **Next Session Priorities**
+   - Clear next steps
+   - Blockers and dependencies
+
+7. **Technical Appendix**
+   - Commit table (hash, message)
+   - Files changed
+   - Metrics
+
+**Prepend entry to CHANGELOG.md after header.**
+
+### Phase 5: Update Visual Changelog
+
+Append session diagrams to cumulative visual timeline:
+
+```bash
+{baseDir}/scripts/update-graphic-log.sh "$DATE_STR"
+```
+
+This creates/updates:
+- `GRAPHIC-CHANGELOG.md` - Markdown with all session diagrams
+- `GRAPHIC-CHANGELOG.pdf` - Cumulative visual timeline PDF
+
+### Phase 6: Generate Session Report PDF
+
+Generate professional PDF from changelog:
+
+```bash
+{baseDir}/scripts/generate-pdf.sh \
+    "$PROJECT_ROOT/CHANGELOG.md" \
+    "$PROJECT_ROOT/changelog-$DATE_STR.pdf"
+```
+
+Template: `{baseDir}/templates/cwh-report.latex`
+- Professional typography (DejaVu fonts)
+- Creative Wheel House branding
+- Embedded graphics support
+- Tables with professional styling
+
+### Phase 7: Validation Gate
+
+**Before sending, validate outputs:**
+
+```bash
+# Check PDF exists and has content
+ls -la "$PROJECT_ROOT/changelog-$DATE_STR.pdf"
+ls -la "$PROJECT_ROOT/GRAPHIC-CHANGELOG.pdf"
+
+# Check page count (pdfinfo if available)
+pdfinfo "$PROJECT_ROOT/changelog-$DATE_STR.pdf" 2>/dev/null | grep Pages
+```
+
+**Display preview:**
+```
+PDF VALIDATION
+---------------------------------------------
+Session Report: changelog-YYYY-MM-DD.pdf
+  Size: [X] KB
+  Pages: [Y]
+
+Visual Evolution: GRAPHIC-CHANGELOG.pdf
+  Size: [X] KB
+  Pages: [Y]
+
+[S]end to Shelly
+[P]review PDFs first
+[A]bort - don't send
+---------------------------------------------
+```
+
+Use AskUserQuestion for approval before proceeding.
+
+### Phase 8: Gather Personal Notes
+
+Ask user for any personal message to include:
 
 ```
 PERSONAL NOTES FOR SHELLY
-
+---------------------------------------------
 Anything you want to say directly to Shelly?
-(Questions, thoughts, context, concerns - anything outside the
-formal changelog that needs communicating. Free-form, babble away.)
+(Questions, thoughts, context - anything that
+doesn't belong in the formal changelog.)
+---------------------------------------------
 ```
 
-Use AskUserQuestion for this interactive step.
+Use AskUserQuestion. This creates a "Personal Notes" section in the email body.
 
-**NOTE:** This input creates a "Personal Notes from Jeremy" section in the EMAIL, separate from the changelog. This is for:
-- Questions that need Shelly's input
-- Context that isn't changelog-worthy but important
-- Free-form thoughts or concerns
-- Anything the user wants to say directly
+### Phase 9: Compose Email
 
-The changelog remains a formal progress document. The email is where personal communication happens.
+WRITE personalized email (natural language, not template):
 
-### Step 7: Write Changelog Entry
+**Structure:**
+- Casual professional greeting
+- 2-3 sentence session summary
+- **Personal notes section** (if provided)
+- Reference to attachments
+- Sign-off: "Jeremy (via Claude)"
 
-Analyze the gathered data and WRITE a comprehensive changelog entry. This is natural language generation, not template filling.
+**Tone:** Friendly, professional, respectful of time.
 
-**Vision: This is a Collaboration Progress Report, Not a Git Log**
+### Phase 10: Send Email
 
-Shelly is a C-level collaborator who:
-- Prefers deliberate pace over rapid shipping
-- Needs to validate decisions before work continues
-- Is shaping vision, not just reviewing code
-- Wants transparency without technical overload
-
-**Entry Structure:**
-
-1. **Session Summary** (2-3 sentences)
-   - What was the goal of this session?
-   - Did we achieve it?
-   - Anything unexpected?
-
-2. **Progress Made** (concrete deliverables, not activity)
-   - What new things exist that didn't before?
-   - What moved from "idea" to "done"?
-   - Tangible outputs, not "worked on X"
-
-3. **Decisions & Rationale** (CRITICAL for collaboration)
-   - What choices were made?
-   - Why this approach over alternatives?
-   - What tradeoffs were accepted?
-   - **Flag any decisions Shelly should validate**
-
-4. **Alignment Check**
-   - Are we still on track with original vision?
-   - Any scope changes or pivots?
-   - Concerns or questions for Shelly
-
-5. **Next Session Priorities**
-   - Clear, specific next steps
-   - Any blockers or dependencies
-   - What decision/input is needed from Shelly?
-
-6. **Technical Appendix** (for reference only, not main content)
-   - Commits (table: hash, message)
-   - Files changed (grouped by type)
-   - Metrics (lines, time)
-   - Diagrams if architecture changed
-
-**Tone:**
-- Conversational but professional
-- Show progress, not just activity
-- Highlight decisions that need validation
-- Respect the deliberate pace
-- Build trust through transparency
-
-**Length:** Entry should be scannable in 2 minutes, with appendix for deep dives.
-
-Prepend entry to `CHANGELOG.md` after the header.
-
-### Step 8: Commit Changelog
+Execute send script with multiple attachments:
 
 ```bash
-git add CHANGELOG.md
-git commit -m "docs: add session changelog entry [date]"
+# Production mode
+python3 {baseDir}/scripts/send-email.py \
+    --to "shelly@shellyfrank.com" \
+    --cc "jeremy@intentsolutions.io" \
+    --subject "Creative Wheel House Progress - $DATE_STR" \
+    --body "$EMAIL_BODY" \
+    --attachment "$PROJECT_ROOT/changelog-$DATE_STR.pdf" \
+    --attachment "$PROJECT_ROOT/GRAPHIC-CHANGELOG.pdf"
+
+# Test mode (sends to Jeremy only)
+python3 {baseDir}/scripts/send-email.py --test \
+    --subject "Creative Wheel House Progress - $DATE_STR" \
+    --body "$EMAIL_BODY" \
+    --attachment "$PROJECT_ROOT/changelog-$DATE_STR.pdf" \
+    --attachment "$PROJECT_ROOT/GRAPHIC-CHANGELOG.pdf"
+```
+
+### Phase 11: Commit and Confirm
+
+```bash
+git add CHANGELOG.md GRAPHIC-CHANGELOG.md GRAPHIC-CHANGELOG.pdf graphics/
+git commit -m "docs: session report $DATE_STR"
 git push origin main
 ```
 
-### Step 9: Generate PDF
-
-Execute the PDF generation script with custom template:
-
-```bash
-{baseDir}/scripts/generate-pdf.sh CHANGELOG.md changelog-[date].pdf
-```
-
-This uses `{baseDir}/templates/cwh-report.latex` for professional styling.
-
-### Step 10: Compose Email (with user notes highlighted)
-
-WRITE a personalized email to Shelly. This is natural language generation:
-
-**Vision: Brief, Respectful, Action-Oriented**
-
-Shelly is busy. The email should:
-- Tell her what happened in under 30 seconds of reading
-- **HIGHLIGHT user's notes/input prominently**
-- Point to the PDF for details (don't duplicate everything)
-
-**Structure:**
-- Casual professional greeting ("Hey Shelly" not "Dear Ms. Frank")
-- 2-3 sentence session summary (what got done, any surprises)
-- **PERSONAL NOTES SECTION** (if user provided input in Step 6):
-  ```
-  A few things on my mind:
-
-  [User's free-form input from Step 6, lightly cleaned up but
-   preserving their voice. Could be questions, thoughts, context,
-   concerns - whatever they wanted to say.]
-  ```
-- Note about attached PDF for full details
-- Sign-off as "Jeremy (via Claude)"
-
-**Tone:**
-- Friendly but professional
-- Respectful of her time
-- Transparent about uncertainties
-- Never overpromise
-
-Do NOT use a template. Write fresh based on the changelog and user input.
-
-### Step 11: Send Email
-
-Execute the send script with composed content:
-
-```bash
-# Production (sends to Shelly)
-python3 {baseDir}/scripts/send-email.py \
-  --to "shelly@shellyfrank.com" \
-  --cc "jeremy@intentsolutions.io" \
-  --subject "Creative Wheel House Progress Update - [date]" \
-  --body "[email_body]" \
-  --attachment "[pdf_path]"
-
-# Test mode (sends only to Jeremy)
-python3 {baseDir}/scripts/send-email.py \
-  --test \
-  --to "shelly@shellyfrank.com" \
-  --subject "Creative Wheel House Progress Update - [date]" \
-  --body "[email_body]" \
-  --attachment "[pdf_path]"
-```
-
-**Note:** Use `--test` flag during testing to redirect all emails to jeremy@intentsolutions.io only.
-
-### Step 12: Confirm Completion
-
-Display summary:
+**Display completion summary:**
 ```
 SHIP SHELLY COMPLETE
+=====================================================
 
-Sweep: [X] PRs merged, [Y] branches cleaned
-Changelog: Entry added for [date]
-PDF: changelog-[date].pdf ([size])
-Email: Sent to shelly@shellyfrank.com
+Sweep Phase
+  PRs merged: [X]
+  Branches cleaned: [Y]
 
-Session Duration: [time]
-Commits: [count]
-Files Changed: [count]
+Diagrams Generated
+  GCP Architecture: graphics/YYYY-MM-DD-architecture.png
+  Workflow: graphics/YYYY-MM-DD-workflow.png
+  Progress: graphics/YYYY-MM-DD-progress.png
+
+Reports Generated
+  Session Report: changelog-YYYY-MM-DD.pdf ([size])
+  Visual Evolution: GRAPHIC-CHANGELOG.pdf ([size])
+
+Email Sent
+  To: shelly@shellyfrank.com
+  CC: jeremy@intentsolutions.io
+  Attachments: 2 PDFs
+
+Session Metrics
+  Commits: [X]
+  Files Changed: [Y]
+
+=====================================================
 ```
 
-## Output Format
+## Output
 
-**Files Created:**
-- `CHANGELOG.md` - Updated with new entry at top
-- `changelog-[date].pdf` - Professional PDF in project root
+**Files created/updated:**
+- `CHANGELOG.md` - Session entry prepended
+- `GRAPHIC-CHANGELOG.md` - Visual timeline updated
+- `GRAPHIC-CHANGELOG.pdf` - Cumulative diagrams PDF
+- `changelog-YYYY-MM-DD.pdf` - Session report PDF
+- `graphics/YYYY-MM-DD-*.png` - Session diagrams
 
-**Email Sent:**
-- To: shelly@shellyfrank.com
-- CC: jeremy@intentsolutions.io
-- Subject: Creative Wheel House Progress Update - [date]
-- Attachment: changelog-[date].pdf
+**Email delivered:**
+- **To:** shelly@shellyfrank.com
+- **CC:** jeremy@intentsolutions.io
+- **Subject:** Creative Wheel House Progress - YYYY-MM-DD
+- **Attachments:**
+  1. Session Report PDF (text + embedded diagrams)
+  2. Visual Evolution PDF (cumulative diagrams only)
 
 ## Error Handling
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| PR review pending | Gemini Code Assistant hasn't reviewed | Wait for review or request manually |
-| Resend API failure | Invalid API key or network | Verify `pass apis/resend-api-key` works |
-| pandoc failure | Missing LaTeX packages | Run `sudo apt install texlive-xetex` |
-| No commits found | Nothing to report | Skip changelog, notify user |
-| Branch protection | Cannot push to main | Use /branch-protection to temporarily disable |
+| diagrams import error | venv not activated | `source .venv/bin/activate` |
+| D2 not found | Not installed | Check `~/.local/bin/d2` |
+| graphviz error | Missing dot binary | `sudo apt install graphviz` |
+| PDF generation fails | Missing LaTeX packages | `sudo apt install texlive-xetex texlive-fonts-extra` |
+| Resend API error | Invalid key | Check `RESEND_API_KEY` in `.env` file |
+| No commits | Nothing to report | Skip or send status-only email |
 
 ## Examples
 
-### Example 1: Standard Session End
+### Example 1: Full Session Delivery
 
-**Invocation:**
 ```
 /ship-shelly
-```
 
-**Result:**
-```
-Starting Ship Shelly workflow...
+Ship Shelly - Session 2026-01-09
+Working from: /home/jeremy/000-projects/creative-wheel-house
 
 SWEEP PHASE
-Found 3 uncommitted files.
-Creating PR #42: "Session work: API integration"
-Waiting for Gemini Code Assistant review...
-Review approved
-Merging PR #42...
-Cleaning stale branches: feature/old-experiment (45 days)
+  Found 5 uncommitted files
+  Creating PR #45: "Session work: diagram automation"
+  Waiting for review... approved
+  Merged PR #45
+  Cleaned 2 stale branches
 
-CHANGELOG PHASE
-Analyzing 8 commits since v0.1.0...
-Writing changelog entry...
-Entry added to CHANGELOG.md
+DIAGRAM GENERATION
+  GCP Architecture: graphics/2026-01-09-architecture.png (94 KB)
+  Workflow: graphics/2026-01-09-workflow.png (234 KB)
+  Progress: graphics/2026-01-09-progress.png (116 KB)
 
-PDF PHASE
-Generating PDF with cwh-report template...
-changelog-20260109.pdf (312 KB)
+CHANGELOG
+  Entry written: 2026-01-09
+  Diagrams embedded inline
 
-EMAIL PHASE
-Composing email to Shelly...
-Sending via Resend...
-Email sent successfully
+VISUAL CHANGELOG
+  Updated: GRAPHIC-CHANGELOG.md
+  Generated: GRAPHIC-CHANGELOG.pdf (4 pages)
 
-COMPLETE
+PDF GENERATION
+  Session Report: changelog-2026-01-09.pdf (312 KB, 3 pages)
+
+VALIDATION
+  [S]end to Shelly? > S
+
+EMAIL
+  Composing personalized email...
+  Sending via Resend...
+  Delivered to shelly@shellyfrank.com
+
+COMPLETE - 2 attachments delivered
 ```
 
-### Example 2: No Changes to Report
+### Example 2: Test Mode
 
-**Invocation:**
 ```
-/ship-shelly
-```
+/ship-shelly --test
 
-**Result:**
-```
-Starting Ship Shelly workflow...
+Ship Shelly - TEST MODE
+All emails will be sent to jeremy@intentsolutions.io only
 
-SWEEP PHASE
-Working directory clean.
-No open PRs to process.
-No stale branches found.
+[proceeds with same workflow]
 
-CHANGELOG PHASE
-No commits since last entry.
-Nothing to report - skipping changelog and email.
-
-Would you like to send a quick status email anyway? [y/n]
+EMAIL
+  TEST MODE: Redirecting to jeremy@intentsolutions.io
+  Delivered successfully
 ```
 
 ## Resources
 
-- `{baseDir}/scripts/generate-pdf.sh` - Pandoc wrapper with template
-- `{baseDir}/scripts/send-email.py` - Resend API integration
-- `{baseDir}/templates/cwh-report.latex` - Professional LaTeX template
-- `{baseDir}/templates/changelog-entry.md` - Reference structure for entries
-- `{baseDir}/references/pandoc-options.md` - Full pandoc configuration reference
+**Scripts:**
+- `{baseDir}/scripts/generate-architecture.py` - GCP diagram with official icons
+- `{baseDir}/scripts/generate-workflow.sh` - D2 workflow diagrams
+- `{baseDir}/scripts/update-graphic-log.sh` - Cumulative visual changelog
+- `{baseDir}/scripts/generate-pdf.sh` - Pandoc PDF generation
+- `{baseDir}/scripts/send-email.py` - Resend multi-attachment delivery
+
+**Templates:**
+- `{baseDir}/templates/cwh-report.latex` - Professional PDF template
+
+**References:**
+- `{baseDir}/references/pandoc-options.md` - Full pandoc configuration
