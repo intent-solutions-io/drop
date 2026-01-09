@@ -109,6 +109,9 @@
 \usepackage{graphicx}
 \graphicspath{{./}{./graphics/}}
 
+% Landscape pages for wide diagrams
+\usepackage{pdflscape}
+
 % Better paragraphs
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.75em}

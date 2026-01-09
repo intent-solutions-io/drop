@@ -10,13 +10,13 @@ This document is sent in full with each progress update. It serves as both chang
 
 ## What We're Building
 
-**Creative Wheel House** is a multi-domain credibility infrastructure built on the **Situation Graph** framework.
+**Creative Wheel House** is a multi-domain credibility infrastructure built on the **CHS Credibility Spine** framework.
 
 **Core idea:** A system for tracking "things happening somewhere over time with evidence." Every claim must be backed by evidence with provenance. No silent rewrites. Append-only history. Audit everything.
 
 **Why it matters:** Current information systems let anyone publish anything. We're building the opposite - a framework where truth is engineered, not assumed. AI helps draft; humans and deterministic gates control what gets published.
 
-## The Situation Graph Framework
+## The CHS Credibility Spine Framework
 
 The heart of the project is a domain-agnostic framework with these core entities:
 
@@ -92,14 +92,14 @@ creative-wheel-house/
 ## What Each Directory Contains
 
 ### packages/core/
-The domain-agnostic master framework. This is where the Situation Graph spec lives - the core entities, verification gates, and non-negotiable rules that apply to ALL domains.
+The domain-agnostic master framework. This is where the CHS Credibility Spine spec lives - the core entities, verification gates, and non-negotiable rules that apply to ALL domains.
 
 **Key files:**
 - `Situation-Graph-Spec-v00.00.01.md` - The master specification defining Nodes, Situations, Claims, Evidence, Assessments, Revisions, Endorsements, and Policies
 - `Domain-Pack-Template-v00.00.01.md` - Template for creating new domain implementations
 
 ### packages/water/
-The water domain pack, implementing the Situation Graph for water quality tracking. This is the pilot domain (IDLW - International Day of Living Water).
+The water domain pack, implementing the CHS Credibility Spine for water quality tracking. This is the pilot domain (IDLW - International Day of Living Water).
 
 **Key files:**
 - `Water-Drop-Master-Plan-v00.04.05.md` - Complete implementation plan including Truth Integrity Doctrine, Evidence Anchoring, Claim Types, Deterministic Gates, and MVP requirements
