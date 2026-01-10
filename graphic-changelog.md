@@ -8,6 +8,29 @@ A chronological record of project architecture and workflow evolution.
 
 * * *
 
+## Session: Jan-10-2026
+
+### Technical Architecture Overview
+_System architecture showing client, compute, AI/ML, and data layers._
+
+![arch-simple](graphics/Jan-10-2026-arch-simple.png)
+
+### GCP Infrastructure Architecture
+_Production cloud infrastructure with Vertex AI, Cloud Run, and data services._
+
+![architecture](graphics/Jan-10-2026-architecture.png)
+
+### Session Progress Metrics
+_Current session statistics and workflow status._
+
+![progress](graphics/Jan-10-2026-progress.png)
+
+### Session Workflow Pipeline
+_End-to-session automation from code changes through delivery._
+
+![workflow](graphics/Jan-10-2026-workflow.png)
+
+* * *
 ## Session: Jan-09-2026
 
 ### GCP Infrastructure Architecture
