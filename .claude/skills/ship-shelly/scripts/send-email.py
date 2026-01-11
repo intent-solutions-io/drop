@@ -168,13 +168,88 @@ def send_email(
             })
         params["attachments"] = attachments
 
-    # Send
+    # Send via Resend, fallback to SMTP if it fails
     try:
         response = resend.Emails.send(params)
         return response
     except Exception as e:
-        print(f"Error sending email: {e}", file=sys.stderr)
+        print(f"Resend failed: {e}", file=sys.stderr)
+        print("Attempting SMTP fallback...", file=sys.stderr)
+
+        # Try SMTP fallback
+        smtp_result = send_via_smtp(to, cc, subject, body, attachment_paths)
+        if smtp_result:
+            return smtp_result
+
+        print("Both Resend and SMTP failed", file=sys.stderr)
         sys.exit(1)
+
+
+def send_via_smtp(
+    to: list[str],
+    cc: list[str],
+    subject: str,
+    body: str,
+    attachment_paths: list[str] | None = None
+) -> dict | None:
+    """Fallback: send via Gmail SMTP."""
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.mime.base import MIMEBase
+    from email import encoders
+
+    # Get SMTP credentials from intent-mail .env or environment
+    smtp_user = os.environ.get("GMAIL_USER_EMAIL")
+    smtp_pass = os.environ.get("GMAIL_APP_PASSWORD")
+
+    # Try loading from intent-mail .env if not in environment
+    if not smtp_user or not smtp_pass:
+        intent_mail_env = Path("/home/jeremy/000-projects/intent-mail/.env")
+        if intent_mail_env.exists():
+            env_vars = load_env_file(intent_mail_env)
+            smtp_user = smtp_user or env_vars.get("GMAIL_USER_EMAIL")
+            smtp_pass = smtp_pass or env_vars.get("GMAIL_APP_PASSWORD")
+
+    if not smtp_user or not smtp_pass:
+        print("SMTP fallback failed: No GMAIL credentials found", file=sys.stderr)
+        return None
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = f"Jeremy Longshore <{smtp_user}>"
+        msg['To'] = ", ".join(to)
+        if cc:
+            msg['Cc'] = ", ".join(cc)
+        msg['Subject'] = subject
+
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Add attachments
+        if attachment_paths:
+            for filepath in attachment_paths:
+                path = Path(filepath)
+                if path.exists():
+                    with open(path, 'rb') as f:
+                        part = MIMEBase('application', 'octet-stream')
+                        part.set_payload(f.read())
+                        encoders.encode_base64(part)
+                        part.add_header('Content-Disposition', f'attachment; filename="{path.name}"')
+                        msg.attach(part)
+
+        # Send
+        all_recipients = to + cc
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass.replace(" ", ""))
+            server.sendmail(smtp_user, all_recipients, msg.as_string())
+
+        print("✓ Email sent via SMTP fallback")
+        return {"id": "smtp-fallback", "method": "smtp"}
+
+    except Exception as e:
+        print(f"SMTP fallback failed: {e}", file=sys.stderr)
+        return None
 
 
 def main():

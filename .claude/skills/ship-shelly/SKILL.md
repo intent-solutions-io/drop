@@ -19,6 +19,13 @@ license: MIT
 
 Automated end-of-session delivery pipeline for C-suite stakeholders.
 
+## CRITICAL RULES
+
+1. **NEVER auto-send emails** - Always show preview and require explicit human confirmation
+2. **Human must push send** - Use AskUserQuestion with [Send] / [Edit] / [Cancel] options
+3. **Show full preview** - Display recipients, subject, body, and attachment list before asking
+4. **No silent sends** - If confirmation step is skipped or unclear, abort and ask again
+
 ## Overview
 
 This skill delivers professional progress updates to Creative Wheel House stakeholders (Shelly Frank, Glen Kerby) with enterprise-grade presentation quality.
@@ -245,10 +252,7 @@ WRITE personalized email (natural language, not template):
 
 ### Phase 10: Send Email
 
-Execute send script with multiple attachments:
-
 ```bash
-# Production mode
 python3 {baseDir}/scripts/send-email.py \
     --to "shelly@shellyfrank.com" \
     --cc "jeremy@intentsolutions.io" \
@@ -257,13 +261,15 @@ python3 {baseDir}/scripts/send-email.py \
     --attachment "$PROJECT_ROOT/changelog-$DATE_STR.pdf" \
     --attachment "$PROJECT_ROOT/graphic-changelog.pdf"
 
-# Test mode (sends to Jeremy only)
+# Test mode
 python3 {baseDir}/scripts/send-email.py --test \
     --subject "Creative Wheel House Progress - $DATE_STR" \
     --body "$EMAIL_BODY" \
     --attachment "$PROJECT_ROOT/changelog-$DATE_STR.pdf" \
     --attachment "$PROJECT_ROOT/graphic-changelog.pdf"
 ```
+
+Uses Resend API, falls back to SMTP if Resend fails.
 
 ### Phase 11: Commit and Confirm
 
